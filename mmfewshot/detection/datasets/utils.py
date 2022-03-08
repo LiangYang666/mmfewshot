@@ -19,6 +19,8 @@ def get_copy_dataset_type(dataset_type: str) -> str:
         copy_dataset_type = 'FewShotVOCCopyDataset'
     elif dataset_type in ['FewShotCocoDataset', 'FewShotCocoDefaultDataset']:
         copy_dataset_type = 'FewShotCocoCopyDataset'
+    elif dataset_type in ['FewShotXYBDataset', 'FewShotXYBDefaultDataset']:
+        copy_dataset_type = 'FewShotXYBCopyDataset'
     else:
         raise TypeError(f'{dataset_type} '
                         f'not support copy data_infos operation.')
