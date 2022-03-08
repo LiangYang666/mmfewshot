@@ -42,7 +42,7 @@ def single_gpu_test(model: nn.Module,
     for i, data in enumerate(data_loader):
         with torch.no_grad():
             # forward in `test` mode
-            result = model(mode='test', rescale=True, **data)
+            result = model(mode='test', rescale=True, **data)   # list,元素为每张图的结果list，其里面元素为array(每个类别的框(*4)和置信度(*1))
 
         batch_size = len(result)
         if show or out_dir:
@@ -69,14 +69,14 @@ def single_gpu_test(model: nn.Module,
                 if is_module_wrapper(model):
                     model.module.show_result(
                         img_show,
-                        result[i],
+                        result[j],
                         show=show,
                         out_file=out_file,
                         score_thr=show_score_thr)
                 else:
                     model.show_result(
                         img_show,
-                        result[i],
+                        result[j],
                         show=show,
                         out_file=out_file,
                         score_thr=show_score_thr)
