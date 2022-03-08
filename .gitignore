@@ -116,6 +116,7 @@ venv.bak/
 *.log.json
 work_dirs/
 mmfewshot/.mim
+result/
 
 # Pytorch
 *.pth
