@@ -1,7 +1,22 @@
 <div align="center">
-
   <img src="resources/mmfewshot-logo.png" width="500px"/>
-
+  <div>&nbsp;</div>
+  <div align="center">
+    <b><font size="5">OpenMMLab website</font></b>
+    <sup>
+      <a href="https://openmmlab.com">
+        <i><font size="4">HOT</font></i>
+      </a>
+    </sup>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <b><font size="5">OpenMMLab platform</font></b>
+    <sup>
+      <a href="https://platform.openmmlab.com">
+        <i><font size="4">TRY IT OUT</font></i>
+      </a>
+    </sup>
+  </div>
+  <div>&nbsp;</div>
 </div>
 
 ## Introduction
@@ -88,8 +103,8 @@ Please refer to [install.md](docs/install.md) for installation of mmfewshot and 
 
 ## Getting Started
 
-If you are new of few shot learning, you can start with [learn the basics](docs/intro.md).
-If you are familiar with it, check out [getting_started.md](docs/get_started.md) for the basic usage of mmfewshot.
+If you are new of few shot learning, you can start with [learn the basics](docs/en/intro.md).
+If you are familiar with it, check out [getting_started.md](docs/en/get_started.md) for the basic usage of mmfewshot.
 
 
 Refer to the below tutorials to dive deeper:
