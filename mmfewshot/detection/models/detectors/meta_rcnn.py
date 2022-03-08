@@ -131,7 +131,7 @@ class MetaRCNN(QuerySupportDetector):
         self.inference_support_dict.clear()
         for class_id in class_ids:
             self.inference_support_dict[class_id] = roi_feats[
-                gt_labels == class_id].mean([0], True)
+                gt_labels == class_id].mean([0], True)  # 获取到每个类别的平均
         # set the init flag
         self.is_model_init = True
         # reset support features buff

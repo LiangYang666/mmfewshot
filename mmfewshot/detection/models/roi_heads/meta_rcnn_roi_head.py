@@ -328,9 +328,9 @@ class MetaRCNNRoIHead(StandardRoIHead):
             support_feat = support_feats_dict[class_id]
             bbox_results = self._bbox_forward(query_roi_feats, support_feat)
             cls_scores_dict[class_id] = \
-                bbox_results['cls_score'][:, class_id:class_id + 1]
+                bbox_results['cls_score'][:, class_id:class_id + 1]     # (300, 81) -> (300, 1)     300为候选框数量
             bbox_preds_dict[class_id] = \
-                bbox_results['bbox_pred'][:, class_id * 4:(class_id + 1) * 4]
+                bbox_results['bbox_pred'][:, class_id * 4:(class_id + 1) * 4]   # (300, 320) -> (300, 4)
             # the official code use the first class background score as final
             # background score, while this code use average of all classes'
             # background scores instead.
