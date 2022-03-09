@@ -117,6 +117,7 @@ venv.bak/
 work_dirs/
 mmfewshot/.mim
 result/
+result_show/
 
 # Pytorch
 *.pth
