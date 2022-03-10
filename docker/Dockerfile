@@ -13,8 +13,8 @@ RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6 git ninja-build 
     && rm -rf /var/lib/apt/lists/*
 
 # Install MMCV MMDetection MMClassification
-RUN pip install mmcv-full==1.3.12 -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.6.0/index.html
-RUN pip install mmcls mmdet
+RUN pip install mmcv-full==1.4.2 -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.6.0/index.html
+RUN pip install mmcls mmdet==2.21.0
 # Install MMFewShot
 RUN conda clean --all
 RUN git clone https://github.com/open-mmlab/mmfewshot.git /mmfewshot
