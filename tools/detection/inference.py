@@ -34,10 +34,10 @@ from typing import List, Optional
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMFewShot test (and eval) a model')
+    parser.add_argument('input', help='directory where source images will be detected')
+    parser.add_argument('output', help='directory where painted images will be saved')
     parser.add_argument('--config', default='./configs/detection/meta_rcnn/coco/meta-rcnn_r50_c4_8xb4_xyb_10shot_novel-fine-tuning.py',help='test config file path')
     parser.add_argument('--checkpoint', default='./work_dirs/meta-rcnn_r50_c4_8xb4_xyb_10shot_novel-fine-tuning/iter_30000.pth', help='checkpoint file')
-    parser.add_argument('--input', help='directory where source images will be detected')
-    parser.add_argument('--output', help='directory where painted images will be saved')
     parser.add_argument(
         '--show-score-thr',
         type=float,
