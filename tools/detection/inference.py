@@ -11,14 +11,6 @@ from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.parallel import collate, scatter
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
-
-from mmcv.image import tensor2imgs
-from mmcv.parallel import is_module_wrapper
-from mmdet.datasets import replace_ImageToTensor
-from mmdet.datasets.pipelines import Compose
-
-from torch import nn
-
 from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
                                           get_copy_dataset_type)
 from mmfewshot.detection.models import build_detector, QuerySupportDetector
@@ -26,18 +18,20 @@ from mmfewshot.detection.models import build_detector, QuerySupportDetector
 from mmfewshot.detection.apis import (inference_detector, init_detector,
                                       process_support_images)
 
-from mmdet.apis import show_result_pyplot
-
-from typing import List, Optional
-
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMFewShot test (and eval) a model')
     parser.add_argument('-input', help='directory where source images will be detected')
     parser.add_argument('-output', help='directory where painted images will be saved')
-    parser.add_argument('--config', default='./configs/detection/meta_rcnn/coco/meta-rcnn_r50_c4_8xb4_xyb_10shot_novel-fine-tuning.py',help='test config file path')
-    parser.add_argument('--checkpoint', default='./work_dirs/meta-rcnn_r50_c4_8xb4_xyb_10shot_novel-fine-tuning/iter_30000.pth', help='checkpoint file')
+    parser.add_argument('--config', default='mytools/xyb-rcnn_r50_c4_8xb4_novel-fine-tuning.py')
+    parser.add_argument('--checkpoint',
+                        default='./work_dirs/meta-rcnn_r50_c4_8xb4_xyb_10shot_novel-fine-tuning/iter_30000.pth',
+                        help='checkpoint file')
+    parser.add_argument(
+        '--save-support-heatmap', action='store_true', help='whether to save the support heat map')
+    parser.add_argument(
+        '--save-query-heatmap', action='store_false', help='whether to save the query heat map')
     parser.add_argument(
         '--show-score-thr',
         type=float,
@@ -51,7 +45,7 @@ def parse_args():
         default=['bbox'],
         nargs='+',
         help='evaluation metrics, which depends on the dataset, e.g., "bbox",'
-        ' "segm", "proposal" for COCO, and "mAP", "recall" for PASCAL VOC')
+             ' "segm", "proposal" for COCO, and "mAP", "recall" for PASCAL VOC')
     parser.add_argument('--show', action='store_true', help='show results')
     parser.add_argument(
         '--show-dir', help='directory where painted images will be saved')
@@ -62,30 +56,30 @@ def parse_args():
     parser.add_argument(
         '--tmpdir',
         help='tmp directory used for collecting results from multiple '
-        'workers, available when gpu-collect is not specified')
+             'workers, available when gpu-collect is not specified')
     parser.add_argument(
         '--cfg-options',
         nargs='+',
         action=DictAction,
         help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+             'in xxx=yyy format will be merged into config file. If the value to '
+             'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
+             'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
+             'Note that the quotation marks are necessary and that no white space '
+             'is allowed.')
     parser.add_argument(
         '--options',
         nargs='+',
         action=DictAction,
         help='custom options for evaluation, the key-value pair in xxx=yyy '
-        'format will be kwargs for dataset.evaluate() function (deprecate), '
-        'change to --eval-options instead.')
+             'format will be kwargs for dataset.evaluate() function (deprecate), '
+             'change to --eval-options instead.')
     parser.add_argument(
         '--eval-options',
         nargs='+',
         action=DictAction,
         help='custom options for evaluation, the key-value pair in xxx=yyy '
-        'format will be kwargs for dataset.evaluate() function')
+             'format will be kwargs for dataset.evaluate() function')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
@@ -107,9 +101,38 @@ def parse_args():
     return args
 
 
+def check_create_dirs(dirs):
+    if isinstance(dirs, str):
+        dirs = [dirs]
+    for dir in dirs:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+            print(f"\t--create dir*** {dir}")
+
+
+def write_to_result_txt(file, result, categories, save_dir, score_thr=0.3):
+    txt_file = os.path.join(save_dir, os.path.basename(file).rsplit('.', 1)[0] + '.txt')
+    assert len(result) == len(categories)
+    with open(txt_file, 'w') as f:
+        for i, category_result in enumerate(result):
+            category_result = category_result.tolist()
+            for category_bbox_result in category_result:
+                if category_bbox_result[-1] >= score_thr:
+                    category_bbox_result = [str(round(x, 3)) for x in category_bbox_result]
+                    f.write(f"{categories[i]}({i}) " + " ".join(category_bbox_result).strip() + "\n")
+
+
 def main():
     args = parse_args()
+    painted_dir = os.path.join(args.output, "painted_images")
+    heatmap_dir = os.path.join(args.output, "heatmaps")
+    txt_result_dir = os.path.join(args.output, "txt_result")
+    check_create_dirs([painted_dir, heatmap_dir, txt_result_dir])
+
     cfg = Config.fromfile(args.config)
+    cfg.heatmap_dir = heatmap_dir
+    cfg.save_support_heatmap = args.save_support_heatmap
+    cfg.save_query_heatmap = args.save_query_heatmap
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
 
@@ -125,7 +148,6 @@ def main():
     # currently only support single images testing
     samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
     assert samples_per_gpu == 1, 'currently only support single images testing'
-
 
     # pop frozen_parameters
     cfg.model.pop('frozen_parameters', None)
@@ -166,6 +188,7 @@ def main():
             dist=False,
             shuffle=False)
 
+    model.cfg = cfg
     model = MMDataParallel(model, device_ids=[0])
     if cfg.data.get('model_init', None) is not None:
         from mmfewshot.detection.apis import (single_gpu_model_init,
@@ -173,15 +196,17 @@ def main():
         single_gpu_model_init(model, model_init_dataloader)
     else:
         from mmdet.apis.test import single_gpu_test
-    model = model.module
-    model.cfg = cfg
-    files = os.listdir(args.input)
 
+    if hasattr(model, "module"):
+        model = model.module
+
+    files = os.listdir(args.input)
     prog_bar = mmcv.ProgressBar(len(files))
     for file in files:
         img = os.path.join(args.input, file)
         result = inference_detector(model, img)
-        model.show_result(img, result, score_thr=args.show_score_thr, out_file=os.path.join(args.output, file))
+        write_to_result_txt(img, result, model.CLASSES, txt_result_dir, score_thr=args.show_score_thr)
+        model.show_result(img, result, score_thr=args.show_score_thr, out_file=os.path.join(painted_dir, file))
         prog_bar.update(1)
 
 
