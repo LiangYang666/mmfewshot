@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument(
         '--save-support-heatmap', action='store_true', help='whether to save the support heat map')
     parser.add_argument(
-        '--save-query-heatmap', action='store_false', help='whether to save the query heat map')
+        '--save-query-heatmap', action='store_true', help='whether to save the query heat map')
     parser.add_argument(
         '--show-score-thr',
         type=float,
