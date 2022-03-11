@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
+import os
 from typing import Dict, List, Optional
 
 import torch
@@ -9,6 +10,7 @@ from mmdet.models.builder import DETECTORS
 from torch import Tensor
 
 from .query_support_detector import QuerySupportDetector
+from mytools.heatmap_visualization import draw_heatmap
 
 
 @DETECTORS.register_module()
@@ -118,6 +120,13 @@ class MetaRCNN(QuerySupportDetector):
         assert len(gt_labels) == img.size(
             0), 'Support instance have more than two labels'
         feats = self.extract_support_feat(img)
+        if hasattr(self, "cfg"):
+            if self.cfg.get("heatmap_dir", None) is not None and self.cfg.get("save_support_heatmap", False):
+                assert isinstance(self.cfg.heatmap_dir, str)
+                heatmap_dir = os.path.join(self.cfg.heatmap_dir, "support")
+                if not os.path.exists(heatmap_dir):
+                    os.mkdir(heatmap_dir)
+                draw_heatmap(feats, img_metas, heatmap_dir)
         roi_feat = self.roi_head.extract_support_feats(feats)
         self._forward_saved_support_dict['gt_labels'].extend(gt_labels)
         self._forward_saved_support_dict['roi_feats'].extend(roi_feat)
@@ -169,6 +178,14 @@ class MetaRCNN(QuerySupportDetector):
             self.model_init()
 
         query_feats = self.extract_feat(img)
+        if hasattr(self, "cfg"):
+            if self.cfg.get("heatmap_dir", None) is not None and self.cfg.get("save_query_heatmap", False):
+                assert isinstance(self.cfg.heatmap_dir, str)
+                heatmap_dir = os.path.join(self.cfg.heatmap_dir, "query")
+                if not os.path.exists(heatmap_dir):
+                    os.mkdir(heatmap_dir)
+                draw_heatmap(query_feats, img_metas, heatmap_dir)
+
         if proposals is None:
             proposal_list = self.rpn_head.simple_test(query_feats, img_metas)
         else:
