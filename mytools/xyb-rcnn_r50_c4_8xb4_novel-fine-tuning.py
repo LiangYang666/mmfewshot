@@ -239,7 +239,7 @@ log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = 'mytools/xyb_r50_c4_8xb4_coco_base-training.pth'
+load_from = 'checkpoints/xyb_r50_c4_8xb4_coco_base-training.pth'
 resume_from = None
 workflow = [('train', 1)]
 use_infinite_sampler = True

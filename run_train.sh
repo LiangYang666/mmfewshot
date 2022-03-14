@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 PYTHONPATH="$(dirname $0)/../../":$PYTHONPATH
 
 python ./tools/detection/train.py \
