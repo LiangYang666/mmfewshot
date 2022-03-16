@@ -15,12 +15,27 @@ from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
 from mmfewshot.detection.models import build_detector
 
 
+def check_create_dirs(dirs):
+    if isinstance(dirs, str):
+        dirs = [dirs]
+    for dir in dirs:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+            print(f"\t--create dir*** {dir}")
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMFewShot test (and eval) a model')
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
+    parser.add_argument('-input', help='directory where source images will be detected')
+    parser.add_argument('-output', help='directory where painted images will be saved')
     parser.add_argument('--out', help='output result file in pickle format')
+    parser.add_argument(
+        '--save-support-heatmap', action='store_true', help='whether to save the support heat map')
+    parser.add_argument(
+        '--save-query-heatmap', action='store_true', help='whether to save the query heat map')
     parser.add_argument(
         '--eval',
         type=str,
@@ -89,6 +104,27 @@ def parse_args():
 
 def main():
     args = parse_args()
+    if args.output is not None:
+        painted_dir = os.path.join(args.output, "painted_images")
+        args.show_dir = painted_dir
+        heatmap_dir = os.path.join(args.output, "heatmaps")
+        txt_result_dir = os.path.join(args.output, "txt_result")
+        check_create_dirs([painted_dir, heatmap_dir, txt_result_dir])
+        # if args.cfg_options is None:
+        #     args.cfg_options = dict()
+        # if "evaluation.jsonfile_prefix" not in args.cfg_options.keys():
+        #     args.cfg_options['evaluation.jsonfile_prefix'] = os.path.join(args.output, "result")
+        if args.eval_options is None:
+            args.eval_options = dict()
+        if "jsonfile_prefix" not in args.eval_options.keys():
+            args.eval_options['jsonfile_prefix'] = os.path.join(args.output, "result")
+        if "iou_thrs" not in args.eval_options.keys():
+            args.eval_options = [0.5]
+
+        if args.out is None:
+            args.out = os.path.join(args.output, "result.pkl")
+        if args.eval is None:
+            args.eval = ["bbox"]
 
     assert args.out or args.eval or args.show \
         or args.show_dir, (
@@ -99,7 +135,12 @@ def main():
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
 
+    # cfg.evaluation.jsonfile_prefix = os.path.join(cfg.)
     cfg = Config.fromfile(args.config)
+    if args.output is not None:
+        cfg.heatmap_dir = heatmap_dir
+        cfg.save_support_heatmap = args.save_support_heatmap
+        cfg.save_query_heatmap = args.save_query_heatmap
 
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
@@ -139,6 +180,7 @@ def main():
     # build the model and load checkpoint
     cfg.model.train_cfg = None
     model = build_detector(cfg.model)
+    model.cfg = cfg
 
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
