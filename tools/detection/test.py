@@ -263,6 +263,25 @@ def main():
             eval_kwargs.update(dict(metric=args.eval, **kwargs))
             print(dataset.evaluate(outputs, **eval_kwargs))
 
+    if args.output is not None:
+        def write_to_result_txt(file, result, categories, save_dir, score_thr=0.3):
+            txt_file = os.path.join(save_dir, file.rsplit('.', 1)[0] + '.txt')
+            dir = os.path.dirname(txt_file)
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+            assert len(result) == len(categories)
+            with open(txt_file, 'w') as f:
+                for i, category_result in enumerate(result):
+                    category_result = category_result.tolist()
+                    for category_bbox_result in category_result:
+                        if category_bbox_result[-1] >= score_thr:
+                            category_bbox_result = [str(round(x, 3)) for x in category_bbox_result]
+                            f.write(f"{categories[i]}({i}) " + " ".join(category_bbox_result).strip() + "\n")
+        assert len(outputs) == len(data_loader)
+        for i, data in enumerate(data_loader):
+            img_ori_filename = data["img_metas"][0].data[0][0]['ori_filename']
+            write_to_result_txt(img_ori_filename, outputs[i], model.module.CLASSES, txt_result_dir, args.show_score_thr)
+
 
 if __name__ == '__main__':
     main()
