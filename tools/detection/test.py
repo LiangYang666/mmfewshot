@@ -119,7 +119,7 @@ def main():
         if "jsonfile_prefix" not in args.eval_options.keys():
             args.eval_options['jsonfile_prefix'] = os.path.join(args.output, "result")
         if "iou_thrs" not in args.eval_options.keys():
-            args.eval_options = [0.5]
+            args.eval_options['iou_thrs'] = [0.5]
 
         if args.out is None:
             args.out = os.path.join(args.output, "result.pkl")
@@ -321,7 +321,7 @@ def main():
         for name in sorted(total):
             accuracy = correct[name]*1.0/total[name]
             temp = [name, correct[name], total[name]-correct[name],
-                    str(round(accuracy*100, 1))+"&", str(round((1-accuracy)*100, 1))+"%"]
+                    str(round(accuracy*100, 1))+"%", str(round((1-accuracy)*100, 1))+"%"]
             data.append(temp)
 
         from terminaltables import AsciiTable

@@ -963,7 +963,7 @@ def cac_map(dataset_dir: str):
         # end Plot title
         x_label = "Number of objects per class"
         output_path = output_files_path + "/detection-results-info.png"
-        to_show = True
+        to_show = False
         plot_color = 'forestgreen'
         true_p_bar = count_true_positives
         draw_plot_func(
@@ -978,4 +978,4 @@ def cac_map(dataset_dir: str):
             true_p_bar,
             flag=False
             )
-    return  gt_counter_per_class, count_true_positives
+    return gt_counter_per_class, count_true_positives
