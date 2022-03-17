@@ -135,7 +135,6 @@ def main():
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
 
-    # cfg.evaluation.jsonfile_prefix = os.path.join(cfg.)
     cfg = Config.fromfile(args.config)
     if args.output is not None:
         cfg.heatmap_dir = heatmap_dir
@@ -261,7 +260,11 @@ def main():
             ]:
                 eval_kwargs.pop(key, None)
             eval_kwargs.update(dict(metric=args.eval, **kwargs))
-            print(dataset.evaluate(outputs, **eval_kwargs))
+            if args.output is not None:
+                result_files, tmp_dir = dataset.format_results(outputs, eval_kwargs["jsonfile_prefix"])
+            else:
+                result = dataset.evaluate(outputs, **eval_kwargs)
+                print(result)
 
     if args.output is not None:
         def write_to_result_txt(file, result, categories, save_dir, score_thr=0.3):
@@ -281,6 +284,49 @@ def main():
         for i, data in enumerate(data_loader):
             img_ori_filename = data["img_metas"][0].data[0][0]['ori_filename']
             write_to_result_txt(img_ori_filename, outputs[i], model.module.CLASSES, txt_result_dir, args.show_score_thr)
+        map_tmp_dir = os.path.join(args.output, "map_dir")
+        true_txt_dir = os.path.join(map_tmp_dir, 'ground-truth')
+        dect_txt_dir = os.path.join(map_tmp_dir, 'detection-results')
+        check_create_dirs([map_tmp_dir, true_txt_dir, dect_txt_dir])
+        cocoGt = data_loader.dataset.coco
+        predictions = mmcv.load(args.eval_options['jsonfile_prefix']+'.bbox.json')
+        cocoDt = cocoGt.loadRes(predictions)
+        ids = cocoGt.get_img_ids()
+        for id in ids:
+            # imgGt = cocoGt.loadImgs(id)[0]
+            imgDt = cocoDt.loadImgs(id)[0]
+            file_name = os.path.basename(imgDt['file_name'].rsplit(".", 1)[0])+'.txt'
+            with open(os.path.join(true_txt_dir, file_name), 'w') as f:
+                for bbox, label in zip(imgDt['ann']['bboxes'], imgDt['ann']['labels']):
+                    category_name = cocoDt.dataset['categories'][label]['name']
+                    bbox = [str(x) for x in bbox]
+                    f.write((category_name+" "+" ".join(bbox)).strip()+"\n")
+            with open(os.path.join(dect_txt_dir, file_name), 'w') as f:
+                dect_info = cocoDt.imgToAnns[id]
+                for each in dect_info:
+                    assert id == each['image_id']
+                    label = each['category_id']
+                    bb = each['bbox']
+                    bbox = [bb[0], bb[1], bb[0]+bb[2], bb[1]+bb[3]]
+                    bbox = [str(x) for x in bbox]
+                    category_name = cocoDt.loadCats(int(label))[0]['name']
+                    score = str(each['score'])
+                    f.write((category_name+" "+score+" "+" ".join(bbox)).strip() + "\n")
+
+        from mytools.map import cac_map
+        total, correct = cac_map(os.path.abspath(map_tmp_dir))
+        data = []
+        headers = ["category", "correct", "error", "accuracy", "false_alarm"]
+        data.append(headers)
+        for name in sorted(total):
+            accuracy = correct[name]*1.0/total[name]
+            temp = [name, correct[name], total[name]-correct[name],
+                    str(round(accuracy*100, 1))+"&", str(round((1-accuracy)*100, 1))+"%"]
+            data.append(temp)
+
+        from terminaltables import AsciiTable
+        table = AsciiTable(data)
+        print(table.table)
 
 
 if __name__ == '__main__':
