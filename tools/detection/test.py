@@ -327,6 +327,8 @@ def main():
         from terminaltables import AsciiTable
         table = AsciiTable(data)
         print(table.table)
+        with open(args.output+"/result.txt", 'w') as f:
+            f.write(str(table.table))
 
 
 if __name__ == '__main__':
