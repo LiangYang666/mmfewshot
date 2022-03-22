@@ -27,5 +27,12 @@ def draw_heatmap(features, img_metas, save_dir):
         w_size = img_metas[i]['ori_shape'][0]
         heatmap = cv2.resize(heatmap, (h_size, w_size))
         superimposed_img = cv2.addWeighted(img, 0.4, heatmap, 0.6, 0)
-        img_cat = np.concatenate((superimposed_img, heatmap, img), axis=1)
-        cv2.imwrite(os.path.join(save_dir, os.path.basename(img_metas[i]['ori_filename'])), img_cat)
+        # img_cat = np.concatenate((superimposed_img, heatmap, img), axis=1)
+        # cv2.imwrite(os.path.join(save_dir, os.path.basename(img_metas[i]['ori_filename'])), img_cat)
+        file_name = os.path.basename(img_metas[i]['ori_filename']).rsplit('.', 1)[0]
+        file_dir = os.path.join(save_dir, file_name)
+        if not os.path.exists(file_dir):
+            os.mkdir(file_dir)
+        cv2.imwrite(os.path.join(file_dir, file_name+"_ori.jpg"), img)
+        cv2.imwrite(os.path.join(file_dir, file_name+"_heatmap.jpg"), heatmap)
+        cv2.imwrite(os.path.join(file_dir, file_name+"_imposed.jpg"), superimposed_img)
