@@ -200,7 +200,7 @@ def main():
     if hasattr(model, "module"):
         model = model.module
 
-    files = os.listdir(args.input)
+    files = sorted(os.listdir(args.input))
     prog_bar = mmcv.ProgressBar(len(files))
     for file in files:
         img = os.path.join(args.input, file)
