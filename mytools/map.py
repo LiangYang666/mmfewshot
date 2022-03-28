@@ -11,7 +11,7 @@ import numpy as np
 
 
 def cac_map(dataset_dir: str):
-    MINOVERLAP = 0.5 # default value (defined in the PASCAL VOC2012 challenge)
+    MINOVERLAP = 0.4
     no_animation = False
     no_plot = False
     quiet = False
