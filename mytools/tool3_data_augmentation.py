@@ -219,10 +219,10 @@ def get_json_info(json_file):
 
 if __name__ == "__main__":
     src_images_dir = f"/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_select/images/val"      # 原图像的保存路径
-    aug_img_dir = f'/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_select/images/val_aug' # 增强后图片的保存路径
+    aug_img_dir = f'/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_aug/images/val_aug' # 增强后图片的保存路径
 
-    json_label_file = f"/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_select/annotations/val.json"   # 原始json
-    new_json_label_file = f"/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_select/annotations/val_aug.json" # 增强后的json
+    json_label_file = f"/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_aug/annotations/val.json"   # 原始json
+    new_json_label_file = f"/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_aug/annotations/val_aug.json" # 增强后的json
 
     if os.path.exists(aug_img_dir):
         shutil.rmtree(aug_img_dir)

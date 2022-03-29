@@ -12,9 +12,9 @@ import shutil
 '''
 if __name__ == "__main__":
     select_img_dir = '/media/E_4TB/YL/mmlab/mmfewshot/result_show_aug/select'       # 挑选出来的图片 但是是绘制了预测框的
-    src_aug_img_dir = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_select/images/val_aug/'     # 原始数据扩充后的图片
+    src_aug_img_dir = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_aug/images/val_aug'     # 原始数据扩充后的图片
     save_select_origin_img_dir = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb/images/val_aug'  # 扩充图片中 根据挑选图 保存原始未预测框的的路径
-    src_json_file = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_select/annotations/val_aug.json'  # 原始数据扩充后的标签
+    src_json_file = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_aug/annotations/val_aug.json'  # 原始数据扩充后的标签
     dst_json_file = '/media/E_4TB/YL/mmlab/mmfewshot/data/few_shot_ann/xyb/annotations/val_select.json'   # 挑选后的标签
     with open(src_json_file, 'r') as f:
         src_json = json.load(f)
@@ -34,12 +34,12 @@ if __name__ == "__main__":
     with open(dst_json_file, 'w') as f:
         json.dump(dst_json, f, indent=2)
     if not os.path.exists(save_select_origin_img_dir):
+        shutil.rmtree(save_select_origin_img_dir)
         os.mkdir(save_select_origin_img_dir)
     for file in files:
         src = os.path.join(src_aug_img_dir, file)
         dst = os.path.join(save_select_origin_img_dir, file)
         shutil.copyfile(src, dst)
-    pass
 
 
 
