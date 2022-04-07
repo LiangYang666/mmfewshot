@@ -16,9 +16,10 @@ from terminaltables import AsciiTable
 from .base import BaseFewShotDataset
 
 # pre-defined classes split for few shot setting
-COCO_SPLIT = dict(
-    NOVEL_CLASSES=('Tank', 'Truck', 'Car'),
-)
+# COCO_SPLIT = dict(
+#     NOVEL_CLASSES=('Tank', 'Truck', 'Car'),
+# )
+COCO_SPLIT = None
 
 
 @DATASETS.register_module()
@@ -50,6 +51,7 @@ class FewShotXYBDataset(BaseFewShotDataset, CocoDataset):
     """
 
     def __init__(self,
+                 coco_split: Optional[dict] = None,
                  classes: Optional[Union[str, Sequence[str]]] = None,
                  num_novel_shots: Optional[int] = None,
                  num_base_shots: Optional[int] = None,
@@ -63,6 +65,8 @@ class FewShotXYBDataset(BaseFewShotDataset, CocoDataset):
                 if test_mode else 'Train dataset'
         else:
             self.dataset_name = dataset_name
+        global COCO_SPLIT
+        COCO_SPLIT = coco_split
         self.SPLIT = COCO_SPLIT
         assert classes is not None, f'{self.dataset_name}: classes in ' \
                                     f'`FewShotCocoDataset` can not be None.'
@@ -589,34 +593,35 @@ class FewShotXYBDefaultDataset(FewShotXYBDataset):
             annotation from `DEFAULT_ANN_CONFIG`.
             For example: [dict(method='TFA', setting='1shot')].
     """
-    coco_benchmark = {
-        f'{shot}SHOT': [
-            dict(
-                type='ann_file',
-                ann_file=f'data/few_shot_ann/xyb/benchmark_{shot}shot/'
-                f'full_box_{shot}shot_{class_name}_trainval.json')
-            for class_name in COCO_SPLIT['NOVEL_CLASSES']
-        ]
-        for shot in [10, 30]
-    }
-
-    # pre-defined annotation config for model reproducibility
-    DEFAULT_ANN_CONFIG = dict(
-        TFA=coco_benchmark,
-        FSCE=coco_benchmark,
-        Attention_RPN={
-            **coco_benchmark, 'Official_10SHOT': [
+    def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+        global COCO_SPLIT
+        COCO_SPLIT = kwargs.get('coco_split')
+        coco_benchmark = {
+            f'{shot}SHOT': [
                 dict(
                     type='ann_file',
-                    ann_file='data/few_shot_ann/xyb/attention_rpn_10shot/'
-                    'official_10_shot_from_instances_train2017.json')
+                    ann_file=f'data/few_shot_ann/xyb/benchmark_{shot}shot/'
+                             f'full_box_{shot}shot_{class_name}_trainval.json')
+                for class_name in COCO_SPLIT['NOVEL_CLASSES']
             ]
-        },
-        MPSR=coco_benchmark,
-        MetaRCNN=coco_benchmark,
-        FSDetView=coco_benchmark)
+            for shot in [10, 30]
+        }
 
-    def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+        # pre-defined annotation config for model reproducibility
+        self.DEFAULT_ANN_CONFIG = dict(
+            TFA=coco_benchmark,
+            FSCE=coco_benchmark,
+            Attention_RPN={
+                **coco_benchmark, 'Official_10SHOT': [
+                    dict(
+                        type='ann_file',
+                        ann_file='data/few_shot_ann/xyb/attention_rpn_10shot/'
+                                 'official_10_shot_from_instances_train2017.json')
+                ]
+            },
+            MPSR=coco_benchmark,
+            MetaRCNN=coco_benchmark,
+            FSDetView=coco_benchmark)
         super().__init__(ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:
