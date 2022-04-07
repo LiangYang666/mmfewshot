@@ -5,7 +5,7 @@ coco_split = dict(
 )
 num_classes = len(coco_split['NOVEL_CLASSES'])
 img_scale = (1000, 600)
-ann_file_val = 'data/few_shot_ann/xyb/annotations/val_vis.json'
+ann_file_val = 'data/few_shot_ann/xyb/annotations/val_select.json'
 train_multi_pipelines = dict(
     query=[
         dict(type='LoadImageFromFile'),
