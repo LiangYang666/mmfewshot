@@ -70,7 +70,7 @@ if __name__ == "__main__":
             bbox = [float(x1), float(y1), float(x2 - x1), float(y2 - y1)]
             area = bbox[2] * bbox[3]
             ann_id += 1
-            ann_info = {'id': ann_id, 'image_id': img_id,
+            ann_info = {'id': ann_id, 'image_id': img_id, "iscrowd": 0,
                         'category_id': category_id, 'bbox': bbox, 'area': area}
             dst_json['annotations'].append(ann_info)
             shutil.copy(os.path.join(data_labelme_dir, img_name), os.path.join(dst_img_dir, img_name))
