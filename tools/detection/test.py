@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import os
+import shutil
 import warnings
 
 import mmcv
@@ -285,6 +286,8 @@ def main():
             img_ori_filename = data["img_metas"][0].data[0][0]['ori_filename']
             write_to_result_txt(img_ori_filename, outputs[i], model.module.CLASSES, txt_result_dir, args.show_score_thr)
         map_tmp_dir = os.path.join(args.output, "map_dir")
+        if os.path.exists(map_tmp_dir):
+            shutil.rmtree(map_tmp_dir)
         true_txt_dir = os.path.join(map_tmp_dir, 'ground-truth')
         dect_txt_dir = os.path.join(map_tmp_dir, 'detection-results')
         check_create_dirs([map_tmp_dir, true_txt_dir, dect_txt_dir])
