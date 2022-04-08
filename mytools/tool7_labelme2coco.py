@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# @FileName  :tool6_labelme2coco.py
+# @FileName  :tool7_labelme2coco.py
 # @Time      :2022/4/3 下午6:57
 # @Author    :Yangliang
 import json
@@ -8,7 +8,6 @@ import os
 import shutil
 
 import cv2
-from pycocotools.coco import COCO
 from terminaltables import AsciiTable
 from tqdm import tqdm
 
