@@ -330,8 +330,13 @@ def main():
         from terminaltables import AsciiTable
         table = AsciiTable(data)
         print(table.table)
+        # with open(args.output+"/result.txt", 'w') as f:
+        #     f.write(str(table.table))
+        for i in range(len(data)):
+            data[i] = [str(x) for x in data[i]]
+            data[i] = '\t'.join(data[i])
         with open(args.output+"/result.txt", 'w') as f:
-            f.write(str(table.table))
+            f.write('\n'.join(data))
 
 
 if __name__ == '__main__':
