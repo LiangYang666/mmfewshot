@@ -593,14 +593,16 @@ class FewShotXYBDefaultDataset(FewShotXYBDataset):
             annotation from `DEFAULT_ANN_CONFIG`.
             For example: [dict(method='TFA', setting='1shot')].
     """
-    def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+    def __init__(self, ann_prefix: Optional[str], ann_cfg: List[Dict], coco_split: Optional[Dict], **kwargs) -> None:
+        # COCO_SPLIT = kwargs.get('coco_split')
+        # ann_prefix = kwargs.get('ann_prefix')
         global COCO_SPLIT
-        COCO_SPLIT = kwargs.get('coco_split')
+        COCO_SPLIT = coco_split
         coco_benchmark = {
             f'{shot}SHOT': [
                 dict(
                     type='ann_file',
-                    ann_file=f'data/few_shot_ann/xyb/benchmark_{shot}shot/'
+                    ann_file=f'{ann_prefix}/benchmark_{shot}shot/'
                              f'full_box_{shot}shot_{class_name}_trainval.json')
                 for class_name in COCO_SPLIT['NOVEL_CLASSES']
             ]
@@ -615,14 +617,14 @@ class FewShotXYBDefaultDataset(FewShotXYBDataset):
                 **coco_benchmark, 'Official_10SHOT': [
                     dict(
                         type='ann_file',
-                        ann_file='data/few_shot_ann/xyb/attention_rpn_10shot/'
+                        ann_file=ann_prefix+'/attention_rpn_10shot/'
                                  'official_10_shot_from_instances_train2017.json')
                 ]
             },
             MPSR=coco_benchmark,
             MetaRCNN=coco_benchmark,
             FSDetView=coco_benchmark)
-        super().__init__(ann_cfg=ann_cfg, **kwargs)
+        super().__init__(ann_cfg=ann_cfg,coco_split=coco_split, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:
         """Parse pre-defined annotation config to annotation information.
