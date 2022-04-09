@@ -1,12 +1,11 @@
 img_norm_cfg = dict(
     mean=[103.53, 116.28, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
 coco_split = dict(
-    NOVEL_CLASSES=('Tank', 'Truck', 'Car', 'Tent', 'Plane')
+    NOVEL_CLASSES=('Tank', 'Truck', 'Car', 'Plane')
 )
 num_classes = len(coco_split['NOVEL_CLASSES'])
 img_scale = (1000, 600)
-
-ann_prefix = 'data/few_shot_ann/xyb_vis'
+ann_prefix = 'data/few_shot_ann/xyb_inf'
 ann_file_val = ann_prefix+'/annotations/val.json'
 train_multi_pipelines = dict(
     query=[
