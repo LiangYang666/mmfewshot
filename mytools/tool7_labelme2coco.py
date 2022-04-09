@@ -11,18 +11,20 @@ import cv2
 from terminaltables import AsciiTable
 from tqdm import tqdm
 
-img_start_id = 3000
-ann_start_id = 10000
+img_start_id = 4000
+ann_start_id = 15000
 
 categories_info = {'Tank': {'id': 1, 'total': 0},     # 如果类别指定不正确 将会报错 由于程序先将所有类别打印出来，因此可以查看输出
                    'Truck': {'id': 2, 'total': 0},     # id为将保存到coco中的类别id (可自己指定)，total是作为统计使用的，初始为0即可
                    'Car': {'id': 3, 'total': 0},
-                   'Tent': {'id': 4, 'total': 0}}
+                   'Plane': {'id': 5, 'total': 0}}
 
 if __name__ == "__main__":
-    data_labelme_dir = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/可见光/3军用设施裁剪+删原图'  # labelme 路径
-    dst_img_dir = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/可见光/images'  # 保存图片的目标文件夹
-    dst_json_file = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/可见光/all.json'  # 保存生成coco json文件
+    data_labelme_dir = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/红外/2挑选裁剪-删除原图-scale'  # labelme 路径
+    dst_img_dir = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/红外/2挑选裁剪-删除原图-scale-coco/images'  # 保存图片的目标文件夹
+    dst_json_file = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/红外/2挑选裁剪-删除原图-scale-coco/all.json'  # 保存生成coco json文件
+    if not os.path.exists(os.path.dirname(dst_json_file)):
+        os.mkdir(os.path.dirname(dst_json_file))
     if not os.path.exists(dst_img_dir):
         os.mkdir(dst_img_dir)
     img_id = img_start_id - 1
@@ -31,10 +33,10 @@ if __name__ == "__main__":
     imgs_suffix = ['jpg', 'jpeg', 'tif', 'png']
     categories = [{'id': categories_info[x]['id'], 'name': x} for x in categories_info.keys()]
     dst_json = {'categories': categories, 'images': [], 'annotations': []}
-    imgs = [x for x in files if x.rsplit('.')[-1].lower() in imgs_suffix]
+    imgs = [x for x in files if x.rsplit('.', 1)[-1].lower() in imgs_suffix]
     categories_get = []
     for img_name in tqdm(imgs):
-        name = img_name.rsplit('.')[0]
+        name = img_name.rsplit('.', 1)[0]
         labelme_json_file = name + '.json'
         if labelme_json_file not in files: continue
         with open(os.path.join(data_labelme_dir, labelme_json_file), 'r') as f:
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     print(f'all categories get: {sorted(categories_get)}')
 
     for img_name in tqdm(imgs):
-        name = img_name.rsplit('.')[0]
+        name = img_name.rsplit('.', 1)[0]
         labelme_json_file = name + '.json'
         if labelme_json_file not in files: continue
         img = cv2.imread(os.path.join(data_labelme_dir, img_name))
