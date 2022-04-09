@@ -12,8 +12,6 @@ import warnings
     从train.json val.json 生成小样本数据集标签
     1.生成n个小样本训练json 支撑集
     2.生成1个小样本验证json 查询集
-    3.修改配置文件中的类别数量
-    4.修改数据集定义中的类别信息
 '''
 
 
@@ -55,7 +53,7 @@ def save_src_train_to_fewshot_json_dir(src_json_file, dst_json_dir, data_prefix)
     for category in src_json['categories']:
         category_name = category['name']
         category_id = category['id']
-        novel_each_json[category_name] = {'categories': src_json['categories'], 'annotations': [], 'images': []}
+        novel_each_json[category_name] = {'categories': src_json['categories'], 'images': [], 'annotations': []}
         add_images_ids = set()
         for ann in src_json['annotations']:
             if category_id == ann['category_id']:
@@ -81,84 +79,16 @@ def save_src_train_to_fewshot_json_dir(src_json_file, dst_json_dir, data_prefix)
     print(f"\tall_total {len(category_names)} {category_names}")
     return category_names
 
-
-def change_config_file(category_names,
-                       config_file="mytools/xyb-rcnn_r50_c4_8xb4_novel-fine-tuning.py",
-                       dataset_file="mmfewshot/detection/datasets/xyb.py"):
-
-    change_flag = False
-    with open(config_file, 'r') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith("num_classes"):
-                infos = line.split("=")
-                infos[0] = infos[0].strip()
-                infos[1] = f"{len(category_names)}\n"
-                lines[i] = ' = '.join(infos)
-                change_flag = True
-                break
-    if change_flag:
-        print(f"\t\t\t{config_file}")
-        with open(config_file, 'w') as f:
-            for line in lines:
-                f.write(line)
-
-    change_flag = False
-    with open(dataset_file, 'r') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith("COCO_SPLIT"):
-                assert "NOVEL_CLASSES" in lines[i+1]
-                if "NOVEL_CLASSES" in lines[i+1]:
-                    infos = lines[i+1].split("=")
-                    infos[1] = str(tuple(category_names))+"\n"
-                    lines[i+1] = "=".join(infos)
-                    change_flag = True
-                    break
-
-    if change_flag:
-        print(f"\t\t\t{dataset_file}\n")
-        with open(dataset_file, 'w') as f:
-            for line in lines:
-                f.write(line)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description='Train a FewShot model')
-    parser.add_argument('-train', '--train-json',
-                        default='data/xyb/annotations/train.json',
-                        help='train json file path')
-    parser.add_argument('-val', '--val-json',
-                        default='data/xyb/annotations/val.json',
-                        help='validate json file path')
-
-    parser.add_argument('-config-file',
-                        default="mytools/xyb-rcnn_r50_c4_8xb4_novel-fine-tuning.py",
-                        help='config json file path')
-
-    parser.add_argument('-dataset-file',
-                        default="mmfewshot/detection/datasets/xyb.py",
-                        help='dataset file path')
-    args = parser.parse_args()
-    return args
-
-
 if __name__ == "__main__":
-    args = parse_args()
-    src_train_json_file = args.train_json
-    src_val_json_file = args.val_json
+    src_train_json_file = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_inf/annotations/train.json'
+    src_val_json_file = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb_inf/annotations/val.json'
 
-    dst_val_json_file = "data/few_shot_ann/xyb/annotations/val.json"
-    dst_few_shot_json_dir = "data/few_shot_ann/xyb/benchmark_10shot"
+    data_prefix = '/media/E_4TB/YL/mmlab/mmfewshot/data/few_shot_ann/xyb_inf/'
+    dst_val_json_file = data_prefix+"annotations/val.json"
+    dst_few_shot_json_dir = data_prefix+"benchmark_10shot"
 
-    val_data_prefix = 'xyb/images/val/'
-    train_data_prefix = 'xyb/images/train/'
+    val_data_prefix = 'xyb_inf/images/val/'
+    train_data_prefix = 'xyb_inf/images/train/'
 
-    category_names = save_src_train_to_fewshot_json_dir(src_train_json_file, dst_few_shot_json_dir, train_data_prefix)
+    save_src_train_to_fewshot_json_dir(src_train_json_file, dst_few_shot_json_dir, train_data_prefix)
     save_src_val_to_val_json_file(src_val_json_file, dst_val_json_file, val_data_prefix)
-
-    config_file = "mytools/xyb-rcnn_r50_c4_8xb4_novel-fine-tuning.py"
-    dataset_file = "mmfewshot/detection/datasets/xyb.py"
-
-    print(f"\t----***----change classes information  ")
-    change_config_file(category_names, config_file, dataset_file)
