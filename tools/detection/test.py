@@ -110,6 +110,7 @@ def main():
         args.show_dir = painted_dir
         heatmap_dir = os.path.join(args.output, "heatmaps")
         txt_result_dir = os.path.join(args.output, "txt_result")
+        shutil.rmtree(args.output)
         check_create_dirs([painted_dir, heatmap_dir, txt_result_dir])
         # if args.cfg_options is None:
         #     args.cfg_options = dict()
