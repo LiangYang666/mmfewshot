@@ -785,12 +785,12 @@ def cac_map(dataset_dir: str):
             # print("temp_gt_count", temp_gt_count)
             # print("tp_repeat sum", sum(tp_repeat))
             # print("fp_repeat sum", sum(fp_repeat))
-            print("det_counter_per_class", det_counter_per_class[class_name])
-            print("count_true_positives", count_true_positives[class_name])
-            print("tp sum", sum(tp))
-            print("fp sum", sum(fp))
-            print("tp", tp)
-            print("fp", fp)
+            # print("det_counter_per_class", det_counter_per_class[class_name])
+            # print("count_true_positives", count_true_positives[class_name])
+            # print("tp sum", sum(tp))
+            # print("fp sum", sum(fp))
+            # print("tp", tp)
+            # print("fp", fp)
 
             #print(tp)
             # compute precision/recall
