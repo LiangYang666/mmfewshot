@@ -15,9 +15,9 @@ from tqdm import tqdm
 '''
 
 if __name__ == "__main__":
-    gt_json_file = f"/media/E_4TB/YL/mmlab/mmfewshot/data/few_shot_ann/xyb/annotations/val_select.json" # 标签json文件
-    src_image_dir = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb/images/val_aug'                           # 图片路径
-    plot_image_dir = '/media/E_4TB/YL/mmlab/mmfewshot/data/xyb/images/val_aug_display'                  # 绘制了结果框的图片保存路径
+    gt_json_file = "/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/红外/2挑选裁剪-删除原图-scale-coco/all.json" # 标签json文件
+    src_image_dir = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/红外/2挑选裁剪-删除原图-scale-coco/images'                           # 图片路径
+    plot_image_dir = '/media/E_4TB/YL/mmlab/mmfewshot/mytools/data/红外/2挑选裁剪-删除原图-scale-coco/images_display'                  # 绘制了结果框的图片保存路径
     if not os.path.exists(plot_image_dir):
         os.mkdir(plot_image_dir)
 
