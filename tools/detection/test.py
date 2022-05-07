@@ -319,14 +319,15 @@ def main():
                     f.write((category_name+" "+score+" "+" ".join(bbox)).strip() + "\n")
 
         from mytools.map import cac_map
-        total, correct = cac_map(os.path.abspath(map_tmp_dir))
+        total, correct, det = cac_map(os.path.abspath(map_tmp_dir))
         data = []
         headers = ["category", "correct", "error", "accuracy", "false_alarm"]
         data.append(headers)
         for name in sorted(total):
             accuracy = correct[name]*1.0/total[name]
+            false_alarm = correct[name]*1.0/det[name]
             temp = [name, correct[name], total[name]-correct[name],
-                    str(round(accuracy*100, 1))+"%", str(round((1-accuracy)*100, 1))+"%"]
+                    str(round(accuracy*100, 1))+"%", str(round((1-false_alarm)*100, 1))+"%"]
             data.append(temp)
 
         from terminaltables import AsciiTable

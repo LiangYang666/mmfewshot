@@ -1087,7 +1087,7 @@ def cac_map(dataset_dir: str):
             plot_color,
             true_p_bar,
             )
-    return gt_counter_per_class, count_true_positives
+    return gt_counter_per_class, count_true_positives, det_counter_per_class
 
 if __name__ =="__main__":
     cac_map("/media/E_4TB/YL/mmlab/mmfewshot/result_show_inf/map_dir")
