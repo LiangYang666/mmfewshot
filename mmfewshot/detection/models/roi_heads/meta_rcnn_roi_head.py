@@ -138,7 +138,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
         (labels, label_weights, bbox_targets, bbox_weights) = bbox_targets
         loss_bbox = {'loss_cls': [], 'loss_bbox': [], 'acc': []}
         batch_size = len(query_img_metas)
-        num_sample_per_imge = query_roi_feats.size(0) // batch_size
+        num_sample_per_imge = query_roi_feats.size(0) // batch_size  # 获取每张图的样本数 因为传入的整个batch所有图的采样
         bbox_results = None
         for img_id in range(batch_size):
             start = img_id * num_sample_per_imge
@@ -213,6 +213,8 @@ class MetaRCNNRoIHead(StandardRoIHead):
             list[Tensor]: List of support features, each item
                 with shape (N, C).
         """
+        if len(feats) == 5:     # 使用fpn时 不对其他特征图计算 节省gpu
+            feats = [feats[-2]]
         out = []
         if self.with_shared_head:
             for lvl in range(len(feats)):

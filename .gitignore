@@ -121,3 +121,7 @@ mmfewshot/.mim
 *.pth
 *.py~
 *.sh~
+
+mytools/data/*
+package/*
+result_show*/

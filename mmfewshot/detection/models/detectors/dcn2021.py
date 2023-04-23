@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# @FileName  :dcn.py
+# @Time      :2022/5/21 下午4:02
+# @Author    :Yangliang
+
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from typing import Dict, List, Optional
@@ -12,8 +18,8 @@ from .query_support_detector import QuerySupportDetector
 
 
 @DETECTORS.register_module()
-class MetaRCNN(QuerySupportDetector):
-    """Implementation of `Meta R-CNN.  <https://arxiv.org/abs/1909.13032>`_.
+class DCNet2021(QuerySupportDetector):
+    """Implementation of `DCNet 2021CVPR.  <https://arxiv.org/abs/1909.13032>`_.
 
     Args:
         backbone (dict): Config of the backbone for query data.
